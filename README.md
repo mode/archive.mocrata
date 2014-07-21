@@ -1,6 +1,7 @@
 # Mocrata
 
-TODO: Write a gem description
+Mocrata is a [SODA](http://dev.socrata.com/) (Socrata Open Data API) client
+developed by [Mode Analytics](https://modeanalytics.com).
 
 ## Installation
 
@@ -18,7 +19,38 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Setup
+
+```
+Mocrata.configure do |config|
+  config.app_token = 'yourtoken' # optional Socrata application token
+end
+```
+
+### Accessing data
+
+```
+dataset = Mocrata::Dataset.new('http://soda.demo.socrata.com/resource/6xzm-fzcu')
+
+dataset.csv
+=> [["Sally", 10], ["Earl", 2]]
+
+dataset.json
+=> [{"name"=>"Sally", "age"=>10}, {"name"=>"Earl", "age"=>2}]
+
+dataset.fields
+=> {"name"=>"text", "age"=>"number"}
+```
+
+### Iterating through rows
+
+```
+dataset.each_row(:csv) do |row|
+  # do something with the row
+end
+
+dataset.each_row(:json) { |row| ... }
+```
 
 ## Contributing
 
