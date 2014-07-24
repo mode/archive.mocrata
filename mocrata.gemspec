@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "simplecov"
-  spec.add_development_dependency "rdoc"
 
   spec.required_ruby_version = "~> 2.0"
 end
