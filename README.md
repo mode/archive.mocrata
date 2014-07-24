@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mode/mocrata.svg?branch=master)](https://travis-ci.org/mode/mocrata)
 [![Code Climate](https://codeclimate.com/repos/53d16a75695680764e01ea68/badges/c93756788e4438e90512/gpa.png)](https://codeclimate.com/repos/53d16a75695680764e01ea68/feed)
+[![Gem Version](https://badge.fury.io/rb/mocrata.svg)](http://badge.fury.io/rb/mocrata)
 
 Mocrata is a [SODA](http://dev.socrata.com/) (Socrata Open Data API) client
 developed by [Mode Analytics](https://modeanalytics.com).
@@ -54,6 +55,10 @@ end
 
 dataset.each_row(:json) { |row| ... }
 ```
+
+## Documentation
+
+http://rubydoc.info/github/mode/mocrata/master/frames
 
 ## Contributing
 
