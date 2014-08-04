@@ -8,7 +8,7 @@ require 'net/https'
 module Mocrata
   # @attr_reader [String] url the request URL
   # @attr_reader [Symbol] format the request format, `:json` or `:csv`
-  # @attr_reader [Hash] params the requst params
+  # @attr_reader [Hash] params the request params
   #
   class Request
     attr_reader :url, :format, :params
@@ -17,7 +17,7 @@ module Mocrata
     #
     # @param url [String] the request URL
     # @param format [Symbol] the request format, `:json` or `:csv`
-    # @param params [Hash] the requst params
+    # @param params [Hash] the request params
     #
     # @return [Mocrata::Request] the instance
     #
@@ -34,7 +34,7 @@ module Mocrata
     def response
       request = Net::HTTP::Get.new(uri.request_uri)
 
-      request.add_field('Accept', content_type)
+      request['Accept'] = content_type
       request.add_field('X-App-Token', Mocrata.config.app_token)
 
       response = http.request(request)
@@ -72,7 +72,7 @@ module Mocrata
     end
 
     def uri
-      @uri ||= URI(url).dup.tap do |uri|
+      @uri ||= URI(url).tap do |uri|
         uri.query = self.class.query_string(soda_params)
       end
     end
