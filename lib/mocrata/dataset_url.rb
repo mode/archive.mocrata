@@ -19,19 +19,20 @@ module Mocrata
       @original = original
     end
 
-    # Normalize a Socrata dataset URL. Ensures https protocol. Removes query
-    # string and fragment, if any.
+    # Convert the original URL to a normalized resource URL
     #
-    # @return [String] the normalized URL
+    # @return [String] the resource URL
     #
-    def normalize
-      uri = URI(self.class.ensure_protocol(original))
+    def to_resource
+      @to_resource ||= normalize
+    end
 
-      uri.scheme   = 'https'
-      uri.fragment = nil
-      uri.query    = nil
-
-      self.class.strip_format(uri.to_s)
+    # Convert the original URL to a normalized OData URL
+    #
+    # @return [String] the OData URL
+    #
+    def to_odata
+      @to_odata ||= normalize.gsub(/\/resource\//, '/OData.svc/')
     end
 
     # Validate the original URL against the expected Socrata dataset URL
@@ -78,6 +79,21 @@ module Mocrata
     private
 
     VALID_PATTERN = /\/resource\//
+
+    # Normalize a Socrata dataset URL. Ensures https protocol. Removes query
+    # string and fragment, if any.
+    #
+    # @return [String] the normalized URL
+    #
+    def normalize
+      uri = URI(self.class.ensure_protocol(original))
+
+      uri.scheme   = 'https'
+      uri.fragment = nil
+      uri.query    = nil
+
+      self.class.strip_format(uri.to_s)
+    end
 
     class InvalidError < StandardError; end
   end

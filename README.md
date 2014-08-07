@@ -34,16 +34,29 @@ end
 ### Accessing data
 
 ```
-dataset = Mocrata::Dataset.new('http://soda.demo.socrata.com/resource/6xzm-fzcu')
+dataset = Mocrata::Dataset.new("http://opendata.socrata.com/resource/mnkm-8ram")
+
+dataset.name
+=> "Country List ISO 3166 Codes Latitude Longitude"
+
+dataset.csv_header
+=> ["Country", "Alpha code", "Numeric code", "Latitude", "Longitude"]
 
 dataset.csv
-=> [["Sally", 10], ["Earl", 2]]
+=> [["Albania", "AL", "8", "41", "20"],
+    ["Algeria", "DZ", "12", "28", "3"], ...]
 
 dataset.json
-=> [{"name"=>"Sally", "age"=>10}, {"name"=>"Earl", "age"=>2}]
+=> [{"longitude_average"=>"20",
+     "latitude_average"=>"41",
+     "alpha_2_code"=>"AL",
+     "numeric_code"=>"8",
+     "country"=>"Albania"}, ...]
 
 dataset.fields
-=> {"name"=>"text", "age"=>"number"}
+=> {":created_at"=>"meta_data", ":id"=>"meta_data", ":updated_at"=>"meta_data",
+"alpha_2_code"=>"text", "country"=>"text", "latitude_average"=>"number",
+"longitude_average"=>"number", "numeric_code"=>"number"}
 ```
 
 ### Iterating through rows

@@ -1,18 +1,26 @@
 # encoding: utf-8
 #
-require 'json'
 require 'csv'
+require 'json'
+require 'rexml/document'
 
 module Mocrata
   class Response
+    OPTIONS = [:preserve_header]
+
     # Construct a new Response instance
     #
     # @param http_response [Net::HTTPResponse] the http response
+    # @param options [Hash] hash of options
+    #
+    # @option options [true, false] :preserve_header whether to preserve CSV
+    #   header
     #
     # @return [Mocrata::Response] the instance
     #
-    def initialize(http_response)
+    def initialize(http_response, options = {})
       @http_response = http_response
+      @options       = options
     end
 
     # Perform certain checks against the HTTP response and raise an exception
@@ -27,6 +35,10 @@ module Mocrata
         if body.respond_to?(:has_key?) && body.has_key?('error')
           raise ResponseError.new("API error: #{body['message']}")
         end
+      end
+
+      unless code == 200
+        raise ResponseError.new("Unexpected response code: #{code}")
       end
 
       true
@@ -46,6 +58,10 @@ module Mocrata
       end
     end
 
+    def code
+      http_response.code.to_i
+    end
+
     # The HTTP response body, processed according to content type
     #
     # @return [Array] the parsed body
@@ -59,7 +75,7 @@ module Mocrata
     # SODA headers that are always encoded as JSON
     JSON_HEADERS = %w(x-soda2-fields x-soda2-types)
 
-    attr_reader :http_response
+    attr_reader :http_response, :options
 
     def content_type
       type = headers['content-type']
@@ -72,11 +88,21 @@ module Mocrata
     end
 
     def csv
-      CSV.parse(http_response.body)[1..-1] # exclude header
+      result = CSV.parse(http_response.body)
+      result = result[1..-1] unless preserve_header?
+      result
     end
 
     def json
       JSON.parse(http_response.body)
+    end
+
+    def xml
+      REXML::Document.new(http_response.body)
+    end
+
+    def preserve_header?
+      options.fetch(:preserve_header, false)
     end
 
     class ResponseError < StandardError; end

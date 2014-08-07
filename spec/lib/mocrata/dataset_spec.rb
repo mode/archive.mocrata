@@ -31,10 +31,12 @@ describe Mocrata::Dataset do
 
   describe '#each_page' do
     it 'yields pages' do
-      expect(dataset).to receive(:json).and_return(*pages)
+      response = double(:response)
+      expect(response).to receive(:body).and_return(*pages)
+      expect(dataset).to receive(:get).and_return(response).at_least(:once)
 
       expect { |b|
-        dataset.each_page(:json, 4, &b)
+        dataset.each_page(:json, :per_page => 4, &b)
       }.to yield_successive_args(*pages)
     end
   end
@@ -53,6 +55,38 @@ describe Mocrata::Dataset do
     end
   end
 
+  describe '#name' do
+    it 'fetches name from odata' do
+      dataset = Mocrata::Dataset.new(
+        'https://data.sfgov.org/resource/dataset-identifier')
+
+      xml = %{<feed>
+      <title type="text">Test name</title>
+      <id>http://opendata.socrata.com/OData.svc/dataset-identifier</id>
+      <updated>2012-06-15T18:15:19Z</updated>
+      </feed>}
+
+      expect(dataset).to receive(:odata).and_return(REXML::Document.new(xml))
+      expect(dataset.name).to eq('Test name')
+    end
+  end
+
+  describe '#odata' do
+    it 'returns odata xml document' do
+      dataset = Mocrata::Dataset.new(
+        'https://data.sfgov.org/resource/funx-qxxn')
+
+      response = Mocrata::Response.new(true)
+      expect(response).to receive(:content_type).and_return(:xml)
+      expect(response).to receive(:http_response).and_return(
+        double(:http_response, :body => ''))
+      expect_any_instance_of(Mocrata::Request).to receive(
+        :response).and_return(response)
+
+      expect(dataset.odata).to be_an_instance_of(REXML::Document)
+    end
+  end
+
   describe '#csv' do
     it 'returns csv body' do
       response = Mocrata::Response.new(true)
@@ -61,6 +95,20 @@ describe Mocrata::Dataset do
       expect(dataset).to receive(:get).and_return(response)
 
       expect(dataset.csv).to eq([])
+    end
+  end
+
+  describe '#csv_header' do
+    it 'returns csv header' do
+      dataset = Mocrata::Dataset.new(
+        'https://data.sfgov.org/resource/funx-qxxn')
+
+      response = double(:response, :body => [['foo', 'bar']])
+
+      expect_any_instance_of(Mocrata::Request).to receive(
+        :response).and_return(response)
+
+      expect(dataset.csv_header).to eq(['foo', 'bar'])
     end
   end
 

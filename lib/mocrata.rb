@@ -12,7 +12,8 @@ module Mocrata
   #
   CONTENT_TYPES = {
     :json => 'application/json',
-    :csv  => 'text/csv'
+    :csv  => 'text/csv',
+    :xml  => 'application/atom+xml'
   }
 
   class << self

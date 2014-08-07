@@ -54,22 +54,97 @@ describe Mocrata::Request do
   end
 
   describe '#soda_params' do
-    it 'is formed with default params' do
+    describe 'with pagination' do
+      it 'has default params' do
+        request = Mocrata::Request.new('', nil, :paginate => true)
+
+        result = request.send(:soda_params)
+
+        expect(result).to eq(:$limit => 1000, :$offset => 0)
+      end
+
+      it 'has custom params' do
+        request = Mocrata::Request.new('', nil, :paginate => true, :page => 2)
+
+        result = request.send(:soda_params)
+
+        expect(result).to eq(:$limit => 1000, :$offset => 1000)
+      end
+    end
+
+    describe 'without pagination' do
+      it 'is empty by default' do
+        request = Mocrata::Request.new('', nil)
+
+        expect(request.send(:soda_params)).to eq({})
+      end
+    end
+
+    it 'ignores unrecognized parameters' do
+      request = Mocrata::Request.new('', nil, {}, { :foo => 'bar', :top => 0 })
+
+      expect(request.send(:soda_params)).to eq(:$top => 0)
+    end
+  end
+
+  describe '#pagination_params' do
+    it 'is formed with default pagination options' do
+      request = Mocrata::Request.new('', nil, :paginate => true)
+
+      result = request.send(:pagination_params)
+
+      expect(result).to eq(:$limit => 1000, :$offset => 0)
+    end
+
+    it 'is formed with custom pagination options' do
+      request = Mocrata::Request.new('', nil,
+        :page => 5, :per_page => 100)
+
+      result = request.send(:pagination_params)
+
+      expect(result).to eq(:$limit => 100, :$offset => 400)
+    end
+  end
+
+  describe '#paginate?' do
+    it 'is false by default' do
       request = Mocrata::Request.new('', nil)
 
-      expect(request.send(:soda_params)).to eq(:$limit => 1000, :$offset => 0)
+      expect(request.send(:paginate?)).to eq(false)
     end
 
-    it 'is formed with custom params' do
-      request = Mocrata::Request.new('', nil, :page => 5, :per_page => 100)
+    it 'allows override' do
+      request = Mocrata::Request.new('', nil, :paginate => true)
 
-      expect(request.send(:soda_params)).to eq(:$limit => 100, :$offset => 400)
+      expect(request.send(:paginate?)).to eq(true)
     end
 
-    it 'ignores custom params' do
-      request = Mocrata::Request.new('', nil, :wat => 'nope')
+    it 'is true if page option is present' do
+      request = Mocrata::Request.new('', nil, :page => 1)
 
-      expect(request.send(:soda_params)).to eq(:$limit => 1000, :$offset => 0)
+      expect(request.send(:paginate?)).to eq(true)
+    end
+
+    it 'is true if per_page option is present' do
+      request = Mocrata::Request.new('', nil, :per_page => 1)
+
+      expect(request.send(:paginate?)).to eq(true)
+    end
+  end
+
+  describe '#response_options' do
+    it 'is empty by default' do
+      request = Mocrata::Request.new('', nil)
+
+      expect(request.send(:response_options)).to eq({})
+    end
+
+    it 'filters request options' do
+      request = Mocrata::Request.new('', nil,
+        :page => 1,
+        :preserve_header => true)
+
+      expect(request.send(:response_options)).to eq(:preserve_header => true)
     end
   end
 
@@ -80,7 +155,7 @@ describe Mocrata::Request do
 
     it 'is formed with default parameters' do
       request = Mocrata::Request.new(
-        'https://data.sfgov.org/resource/funx-qxxn', nil)
+        'https://data.sfgov.org/resource/funx-qxxn', nil, :paginate => true)
 
       result = request.send(:uri).to_s
 
@@ -92,7 +167,8 @@ describe Mocrata::Request do
       request = Mocrata::Request.new(
         'https://data.sfgov.org/resource/funx-qxxn', nil,
         :per_page => 5,
-        :page     => 3)
+        :page     => 3,
+        :paginate => true)
 
       result = request.send(:uri).to_s
 

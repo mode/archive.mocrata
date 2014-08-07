@@ -9,25 +9,38 @@ describe Mocrata::Response do
 
   describe '#validate!' do
     it 'returns true without content type' do
+      expect(response).to receive(:code).and_return(200)
       expect(response).to receive(:content_type).and_return(nil)
       expect(response.validate!).to be true
     end
 
     it 'returns true with csv content' do
+      expect(response).to receive(:code).and_return(200)
       expect(response).to receive(:content_type).and_return(:csv)
       expect(response.validate!).to be true
     end
 
     it 'returns true with json array' do
+      expect(response).to receive(:code).and_return(200)
       expect(response).to receive(:content_type).and_return(:json)
       expect(response).to receive(:body).and_return([])
       expect(response.validate!).to be true
     end
 
     it 'returns true with json array' do
+      expect(response).to receive(:code).and_return(200)
       expect(response).to receive(:content_type).and_return(:json)
       expect(response).to receive(:body).at_least(:once).and_return({})
       expect(response.validate!).to be true
+    end
+
+    it 'raises exception if response code is unexpected' do
+      expect(response).to receive(:code).and_return(201).at_least(:once)
+      expect(response).to receive(:content_type).and_return(:json)
+      expect(response).to receive(:body).at_least(:once).and_return({})
+
+      expect { response.validate! }.to raise_error(
+        Mocrata::Response::ResponseError)
     end
 
     it 'raises exception with json error' do
@@ -79,10 +92,21 @@ describe Mocrata::Response do
   end
 
   describe '#csv' do
-    it 'parses body and excludes header' do
-      csv = "\"header1\"\n\"row1\"\n\"row2\""
-      expect(response.send(:http_response)).to receive(:body).and_return(csv)
-      expect(response.send(:csv)).to eq([['row1'], ['row2']])
+    describe 'without header' do
+      it 'parses body and excludes header' do
+        csv = "\"header1\"\n\"row1\"\n\"row2\""
+        expect(response.send(:http_response)).to receive(:body).and_return(csv)
+        expect(response.send(:csv)).to eq([['row1'], ['row2']])
+      end
+    end
+
+    describe 'with header' do
+      it 'parses body and preserves header' do
+        expect(response).to receive(:preserve_header?).and_return(true)
+        csv = "\"header1\"\n\"row1\"\n\"row2\""
+        expect(response.send(:http_response)).to receive(:body).and_return(csv)
+        expect(response.send(:csv)).to eq([['header1'], ['row1'], ['row2']])
+      end
     end
   end
 
@@ -127,6 +151,29 @@ describe Mocrata::Response do
       expect(response.headers).to eq(
         'x-foo-header'   => 'foo',
         'x-soda2-fields' => { 'name' => 'value' })
+    end
+  end
+
+  describe '#code' do
+    it 'converts http response status to integer' do
+      http_response = double(:http_response, :code => '200')
+      response = Mocrata::Response.new(http_response)
+
+      expect(response.code).to eq(200)
+    end
+  end
+
+  describe '#preserve_header?' do
+    it 'is false by default' do
+      response = Mocrata::Response.new(true)
+
+      expect(response.send(:preserve_header?)).to eq(false)
+    end
+
+    it 'allows override' do
+      response = Mocrata::Response.new(true, :preserve_header => true)
+
+      expect(response.send(:preserve_header?)).to eq(true)
     end
   end
 end

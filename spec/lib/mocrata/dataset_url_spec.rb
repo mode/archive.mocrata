@@ -25,7 +25,8 @@ describe Mocrata::DatasetUrl do
       url = Mocrata::DatasetUrl.new(
         'data.sfgov.org/resource/funx-qxxn.csv?limit=100#foo')
 
-      expect(url.normalize).to eq('https://data.sfgov.org/resource/funx-qxxn')
+      expect(url.send(:normalize)).to eq(
+        'https://data.sfgov.org/resource/funx-qxxn')
     end
   end
 

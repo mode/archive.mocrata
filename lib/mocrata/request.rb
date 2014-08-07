@@ -5,26 +5,38 @@ require 'csv'
 require 'json'
 require 'net/https'
 
+require 'mocrata/version'
+
 module Mocrata
   # @attr_reader [String] url the request URL
   # @attr_reader [Symbol] format the request format, `:json` or `:csv`
+  # @attr_reader [Hash] options hash of options
   # @attr_reader [Hash] params the request params
   #
   class Request
-    attr_reader :url, :format, :params
+    attr_reader :url, :format, :options, :params
 
     # Construct a new Request instance
     #
     # @param url [String] the request URL
     # @param format [Symbol] the request format, `:json` or `:csv`
-    # @param params [Hash] the request params
+    # @param options [optional, Hash] hash of options
+    # @param params [optional, Hash] the request params
+    #
+    # @option options [Integer] :page the page to request
+    # @option options [Integer] :per_page the number of rows to return for each
+    #   page
+    # @option options [true, false] :paginate whether to add pagination params
+    # @option options [true, false] :preserve_header whether to preserve CSV
+    #   header
     #
     # @return [Mocrata::Request] the instance
     #
-    def initialize(url, format, params = {})
-      @url    = url
-      @format = format
-      @params = params
+    def initialize(url, format, options = {}, params = {})
+      @url     = url
+      @format  = format
+      @options = options
+      @params  = params
     end
 
     # Perform the HTTP GET request
@@ -34,12 +46,14 @@ module Mocrata
     def response
       request = Net::HTTP::Get.new(uri.request_uri)
 
-      request['Accept'] = content_type
-      request.add_field('X-App-Token', Mocrata.config.app_token)
+      request['accept']     = content_type
+      request['user-agent'] = USER_AGENT
+
+      request.add_field('x-app-token', Mocrata.config.app_token)
 
       response = http.request(request)
 
-      Mocrata::Response.new(response).tap(&:validate!)
+      Mocrata::Response.new(response, response_options).tap(&:validate!)
     end
 
     # @return [String] the content type for the specified format
@@ -54,6 +68,9 @@ module Mocrata
 
     private
 
+    USER_AGENT = "mocrata/#{Mocrata::VERSION}"
+    SODA_PARAM_KEYS = %w(top limit)
+
     def http
       @http ||= Net::HTTP.new(uri.host, uri.port).tap do |http|
         http.use_ssl     = true
@@ -63,11 +80,35 @@ module Mocrata
 
     def soda_params
       @soda_params ||= {}.tap do |soda|
-        limit = params.fetch(:per_page, Mocrata.config.per_page)
-        page  = params.fetch(:page, 1)
+        soda.merge!(pagination_params) if paginate?
 
-        soda[:$limit]  = limit
-        soda[:$offset] = (page - 1) * limit
+        SODA_PARAM_KEYS.each do |key|
+          if params.has_key?(key.to_sym)
+            soda[:"$#{key}"] = params.fetch(key.to_sym)
+          end
+        end
+      end
+    end
+
+    def pagination_params
+      {}.tap do |result|
+        limit = options.fetch(:per_page, Mocrata.config.per_page)
+        page  = options.fetch(:page, 1)
+
+        result[:$limit]  = limit
+        result[:$offset] = (page - 1) * limit
+      end
+    end
+
+    def paginate?
+      options.fetch(:paginate, false) ||
+        options.has_key?(:page) ||
+        options.has_key?(:per_page)
+    end
+
+    def response_options
+      options.keep_if do |key, value|
+        Mocrata::Response::OPTIONS.include?(key)
       end
     end
 
