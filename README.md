@@ -25,7 +25,7 @@ Or install it yourself as:
 
 ### Setup
 
-```
+```ruby
 Mocrata.configure do |config|
   config.app_token = 'yourtoken' # optional Socrata application token
 end
@@ -33,7 +33,7 @@ end
 
 ### Accessing data
 
-```
+```ruby
 dataset = Mocrata::Dataset.new("http://opendata.socrata.com/resource/mnkm-8ram")
 
 dataset.name
@@ -61,7 +61,7 @@ dataset.fields
 
 ### Iterating through rows
 
-```
+```ruby
 dataset.each_row(:csv) do |row|
   # do something with the row
 end
