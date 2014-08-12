@@ -5,6 +5,8 @@ require 'json'
 require 'rexml/document'
 
 module Mocrata
+  # Represents a Socrata API response
+  #
   class Response
     OPTIONS = [:preserve_header]
 
@@ -32,14 +34,12 @@ module Mocrata
     #
     def validate!
       if content_type == :json
-        if body.respond_to?(:has_key?) && body.has_key?('error')
-          raise ResponseError.new("API error: #{body['message']}")
+        if body.respond_to?(:key?) && body.key?('error')
+          fail ResponseError, "API error: #{body['message']}"
         end
       end
 
-      unless code == 200
-        raise ResponseError.new("Unexpected response code: #{code}")
-      end
+      fail ResponseError, "Unexpected response code: #{code}" unless code == 200
 
       true
     end
@@ -84,7 +84,7 @@ module Mocrata
         return key if type && type.start_with?(value)
       end
 
-      raise ResponseError.new("Unexpected content type: #{type}")
+      fail ResponseError, "Unexpected content type: #{type}"
     end
 
     def csv

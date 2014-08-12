@@ -8,12 +8,10 @@ module Mocrata
   #
   # @see http://dev.socrata.com/docs/formats/ Socrata format documentation
   #
-  # @todo Add support for application/rdf+xml
-  #
   CONTENT_TYPES = {
-    :json => 'application/json',
-    :csv  => 'text/csv',
-    :xml  => 'application/atom+xml'
+    json: 'application/json',
+    csv:  'text/csv',
+    xml:  'application/atom+xml'
   }
 
   class << self
@@ -27,7 +25,7 @@ module Mocrata
     #     config.per_page  = 1000
     #   end
     #
-    def configure(&block)
+    def configure
       yield config
     end
 
@@ -42,9 +40,7 @@ module Mocrata
     # Remove Mocrata configuration instance variable
     #
     def reset
-      if instance_variable_defined?(:@config)
-        remove_instance_variable(:@config)
-      end
+      remove_instance_variable(:@config) if instance_variable_defined?(:@config)
     end
   end
 end

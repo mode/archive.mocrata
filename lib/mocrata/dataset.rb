@@ -30,9 +30,11 @@ module Mocrata
     #     # do something with the row
     #   end
     #
-    def each_row(format = :json, &block)
+    def each_row(format = :json)
       each_page(format) do |page|
-        page.each(&block)
+        page.each do |row|
+          yield row
+        end
       end
     end
 
@@ -52,12 +54,12 @@ module Mocrata
     #     # do something with the page
     #   end
     #
-    def each_page(format = :json, options = {}, &block)
+    def each_page(format = :json, options = {})
       page     = options.fetch(:page, 1)
       per_page = options.fetch(:per_page, Mocrata.config.per_page)
 
-      while true
-        rows = get(format, :page => page, :per_page => per_page).body
+      loop do
+        rows = get(format, page: page, per_page: per_page).body
         yield rows
         break if rows.size < per_page
         page += 1
@@ -97,8 +99,8 @@ module Mocrata
     # @return [Array<String>] the array of headers
     #
     def csv_header
-      options = { :paginate => false, :preserve_header => true }
-      params  = { :limit => 0 }
+      options = { paginate: false, preserve_header: true }
+      params  = { limit: 0 }
 
       Mocrata::Request.new(resource_url, :csv, options, params).response.body[0]
     end
@@ -109,7 +111,7 @@ module Mocrata
     # @return [Hash] a hash of headers
     #
     def headers
-      @headers ||= get(:json, :per_page => 0).headers
+      @headers ||= get(:json, per_page: 0).headers
     end
 
     # A hash of field names and types from headers
@@ -125,7 +127,7 @@ module Mocrata
     # @return [REXML::Document] a parsed REXML document
     #
     def odata
-      @odata ||= Mocrata::Request.new(odata_url, :xml, :top => 0).response.body
+      @odata ||= Mocrata::Request.new(odata_url, :xml, top: 0).response.body
     end
 
     # The name of the dataset from OData

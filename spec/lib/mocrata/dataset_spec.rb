@@ -36,7 +36,7 @@ describe Mocrata::Dataset do
       expect(dataset).to receive(:get).and_return(response).at_least(:once)
 
       expect { |b|
-        dataset.each_page(:json, :per_page => 4, &b)
+        dataset.each_page(:json, per_page: 4, &b)
       }.to yield_successive_args(*pages)
     end
   end
@@ -60,11 +60,11 @@ describe Mocrata::Dataset do
       dataset = Mocrata::Dataset.new(
         'https://data.sfgov.org/resource/dataset-identifier')
 
-      xml = %{<feed>
+      xml = %(<feed>
       <title type="text">Test name</title>
       <id>http://opendata.socrata.com/OData.svc/dataset-identifier</id>
       <updated>2012-06-15T18:15:19Z</updated>
-      </feed>}
+      </feed>)
 
       expect(dataset).to receive(:odata).and_return(REXML::Document.new(xml))
       expect(dataset.name).to eq('Test name')
@@ -79,7 +79,7 @@ describe Mocrata::Dataset do
       response = Mocrata::Response.new(true)
       expect(response).to receive(:content_type).and_return(:xml)
       expect(response).to receive(:http_response).and_return(
-        double(:http_response, :body => ''))
+        double(:http_response, body: ''))
       expect_any_instance_of(Mocrata::Request).to receive(
         :response).and_return(response)
 
@@ -103,12 +103,12 @@ describe Mocrata::Dataset do
       dataset = Mocrata::Dataset.new(
         'https://data.sfgov.org/resource/funx-qxxn')
 
-      response = double(:response, :body => [['foo', 'bar']])
+      response = double(:response, body: [%w(foo bar)])
 
       expect_any_instance_of(Mocrata::Request).to receive(
         :response).and_return(response)
 
-      expect(dataset.csv_header).to eq(['foo', 'bar'])
+      expect(dataset.csv_header).to eq(%w(foo bar))
     end
   end
 
@@ -143,8 +143,8 @@ describe Mocrata::Dataset do
     end
 
     it 'builds map' do
-      expect(dataset).to receive(:field_names).and_return(['key1', 'key2'])
-      expect(dataset).to receive(:field_types).and_return(['val1', 'val2'])
+      expect(dataset).to receive(:field_names).and_return(%w(key1 key2))
+      expect(dataset).to receive(:field_types).and_return(%w(val1 val2))
 
       expect(dataset.fields).to eq('key1' => 'val1', 'key2' => 'val2')
     end
@@ -159,9 +159,9 @@ describe Mocrata::Dataset do
 
     it 'returns header if present' do
       expect(dataset).to receive(:headers).and_return(
-        'x-soda2-fields' => ['name1', 'name2'])
+        'x-soda2-fields' => %w(name1 name2))
 
-      expect(dataset.send(:field_names)).to eq(['name1', 'name2'])
+      expect(dataset.send(:field_names)).to eq(%w(name1 name2))
     end
   end
 
@@ -174,9 +174,9 @@ describe Mocrata::Dataset do
 
     it 'returns header if present' do
       expect(dataset).to receive(:headers).and_return(
-        'x-soda2-types' => ['type1', 'type2'])
+        'x-soda2-types' => %w(type1 type2))
 
-      expect(dataset.send(:field_types)).to eq(['type1', 'type2'])
+      expect(dataset.send(:field_types)).to eq(%w(type1 type2))
     end
   end
 end

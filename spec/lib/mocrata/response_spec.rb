@@ -114,7 +114,7 @@ describe Mocrata::Response do
     it 'parses body' do
       json = '[{"key1":"val1"}]'
       expect(response.send(:http_response)).to receive(:body).and_return(json)
-      expect(response.send(:json)).to eq([{'key1' => 'val1'}])
+      expect(response.send(:json)).to eq([{ 'key1' => 'val1' }])
     end
   end
 
@@ -156,7 +156,7 @@ describe Mocrata::Response do
 
   describe '#code' do
     it 'converts http response status to integer' do
-      http_response = double(:http_response, :code => '200')
+      http_response = double(:http_response, code: '200')
       response = Mocrata::Response.new(http_response)
 
       expect(response.code).to eq(200)
@@ -171,7 +171,7 @@ describe Mocrata::Response do
     end
 
     it 'allows override' do
-      response = Mocrata::Response.new(true, :preserve_header => true)
+      response = Mocrata::Response.new(true, preserve_header: true)
 
       expect(response.send(:preserve_header?)).to eq(true)
     end

@@ -1,9 +1,11 @@
 # encoding: utf-8
 #
 module Mocrata
-  # @attr_reader [String] original the original Socrata dataset URL
+  # Represents the URL of a Socrata dataset
   #
   class DatasetUrl
+    # @attr_reader [String] original the original Socrata dataset URL
+    #
     attr_reader :original
 
     # Construct a new DatasetUrl instance
@@ -32,7 +34,7 @@ module Mocrata
     # @return [String] the OData URL
     #
     def to_odata
-      @to_odata ||= normalize.gsub(/\/resource\//, '/OData.svc/')
+      @to_odata ||= normalize.gsub(%r{/resource/}, '/OData.svc/')
     end
 
     # Validate the original URL against the expected Socrata dataset URL
@@ -42,7 +44,7 @@ module Mocrata
     #
     def validate!
       unless original =~ VALID_PATTERN
-        raise InvalidError.new("Invalid URL: #{original.inspect}")
+        fail InvalidError, "Invalid URL: #{original.inspect}"
       end
 
       true
@@ -56,9 +58,9 @@ module Mocrata
       # @return [String] the url with protocol
       #
       def ensure_protocol(url)
-        if url =~ /\A\/\//
+        if url =~ %r{\A//}
           url = "https:#{url}"
-        elsif url !~ /\Ahttps?:\/\//
+        elsif url !~ %r{\Ahttps?://}
           url = "https://#{url}"
         end
 
@@ -78,7 +80,7 @@ module Mocrata
 
     private
 
-    VALID_PATTERN = /\/resource\//
+    VALID_PATTERN = %r{/resource/}
 
     # Normalize a Socrata dataset URL. Ensures https protocol. Removes query
     # string and fragment, if any.

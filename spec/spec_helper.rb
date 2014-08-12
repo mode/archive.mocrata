@@ -7,6 +7,3 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'mocrata'
-
-RSpec.configure do |config|
-end

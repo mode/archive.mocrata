@@ -56,7 +56,7 @@ describe Mocrata::Request do
   describe '#soda_params' do
     describe 'with pagination' do
       it 'has default params' do
-        request = Mocrata::Request.new('', nil, :paginate => true)
+        request = Mocrata::Request.new('', nil, paginate: true)
 
         result = request.send(:soda_params)
 
@@ -64,7 +64,7 @@ describe Mocrata::Request do
       end
 
       it 'has custom params' do
-        request = Mocrata::Request.new('', nil, :paginate => true, :page => 2)
+        request = Mocrata::Request.new('', nil, paginate: true, page: 2)
 
         result = request.send(:soda_params)
 
@@ -81,7 +81,7 @@ describe Mocrata::Request do
     end
 
     it 'ignores unrecognized parameters' do
-      request = Mocrata::Request.new('', nil, {}, { :foo => 'bar', :top => 0 })
+      request = Mocrata::Request.new('', nil, {}, foo: 'bar', top: 0)
 
       expect(request.send(:soda_params)).to eq(:$top => 0)
     end
@@ -89,7 +89,7 @@ describe Mocrata::Request do
 
   describe '#pagination_params' do
     it 'is formed with default pagination options' do
-      request = Mocrata::Request.new('', nil, :paginate => true)
+      request = Mocrata::Request.new('', nil, paginate: true)
 
       result = request.send(:pagination_params)
 
@@ -97,8 +97,7 @@ describe Mocrata::Request do
     end
 
     it 'is formed with custom pagination options' do
-      request = Mocrata::Request.new('', nil,
-        :page => 5, :per_page => 100)
+      request = Mocrata::Request.new('', nil, page: 5, per_page: 100)
 
       result = request.send(:pagination_params)
 
@@ -114,19 +113,19 @@ describe Mocrata::Request do
     end
 
     it 'allows override' do
-      request = Mocrata::Request.new('', nil, :paginate => true)
+      request = Mocrata::Request.new('', nil, paginate: true)
 
       expect(request.send(:paginate?)).to eq(true)
     end
 
     it 'is true if page option is present' do
-      request = Mocrata::Request.new('', nil, :page => 1)
+      request = Mocrata::Request.new('', nil, page: 1)
 
       expect(request.send(:paginate?)).to eq(true)
     end
 
     it 'is true if per_page option is present' do
-      request = Mocrata::Request.new('', nil, :per_page => 1)
+      request = Mocrata::Request.new('', nil, per_page: 1)
 
       expect(request.send(:paginate?)).to eq(true)
     end
@@ -140,11 +139,9 @@ describe Mocrata::Request do
     end
 
     it 'filters request options' do
-      request = Mocrata::Request.new('', nil,
-        :page => 1,
-        :preserve_header => true)
+      request = Mocrata::Request.new('', nil, page: 1, preserve_header: true)
 
-      expect(request.send(:response_options)).to eq(:preserve_header => true)
+      expect(request.send(:response_options)).to eq(preserve_header: true)
     end
   end
 
@@ -155,7 +152,7 @@ describe Mocrata::Request do
 
     it 'is formed with default parameters' do
       request = Mocrata::Request.new(
-        'https://data.sfgov.org/resource/funx-qxxn', nil, :paginate => true)
+        'https://data.sfgov.org/resource/funx-qxxn', nil, paginate: true)
 
       result = request.send(:uri).to_s
 
@@ -166,9 +163,9 @@ describe Mocrata::Request do
     it 'is formed with custom parameters' do
       request = Mocrata::Request.new(
         'https://data.sfgov.org/resource/funx-qxxn', nil,
-        :per_page => 5,
-        :page     => 3,
-        :paginate => true)
+        per_page: 5,
+        page:     3,
+        paginate: true)
 
       result = request.send(:uri).to_s
 
@@ -183,17 +180,17 @@ describe Mocrata::Request do
     end
 
     it 'forms simple query string' do
-      result = Mocrata::Request.query_string(:foo => 'bar')
+      result = Mocrata::Request.query_string(foo: 'bar')
       expect(result).to eq('foo=bar')
     end
 
     it 'forms complex string' do
-      result = Mocrata::Request.query_string(:foo => 'bar', :bar => 'baz')
+      result = Mocrata::Request.query_string(foo: 'bar', bar: 'baz')
       expect(result).to eq('foo=bar&bar=baz')
     end
 
     it 'escapes values' do
-      result = Mocrata::Request.query_string(:foo => '"\'Stop!\' said Fred"')
+      result = Mocrata::Request.query_string(foo: '"\'Stop!\' said Fred"')
 
       expect(result).to eq('foo=%22%27Stop%21%27+said+Fred%22')
     end

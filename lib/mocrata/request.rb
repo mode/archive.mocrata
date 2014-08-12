@@ -8,13 +8,24 @@ require 'net/https'
 require 'mocrata/version'
 
 module Mocrata
-  # @attr_reader [String] url the request URL
-  # @attr_reader [Symbol] format the request format, `:json` or `:csv`
-  # @attr_reader [Hash] options hash of options
-  # @attr_reader [Hash] params the request params
+  # Represents a Socrata API request
   #
   class Request
-    attr_reader :url, :format, :options, :params
+    # @attr_reader [String] url the request URL
+    #
+    attr_reader :url
+
+    # @attr_reader [Symbol] format the request format, `:json` or `:csv`
+    #
+    attr_reader :format
+
+    # @attr_reader [Hash] options hash of options
+    #
+    attr_reader :options
+
+    # @attr_reader [Hash] params the request params
+    #
+    attr_reader :params
 
     # Construct a new Request instance
     #
@@ -62,7 +73,7 @@ module Mocrata
     #
     def content_type
       Mocrata::CONTENT_TYPES.fetch(format, nil).tap do |type|
-        raise RequestError.new("Invalid format: #{format}") unless type
+        fail(RequestError, "Invalid format: #{format}") unless type
       end
     end
 
@@ -83,9 +94,9 @@ module Mocrata
         soda.merge!(pagination_params) if paginate?
 
         SODA_PARAM_KEYS.each do |key|
-          if params.has_key?(key.to_sym)
-            soda[:"$#{key}"] = params.fetch(key.to_sym)
-          end
+          next unless params.key?(key.to_sym)
+
+          soda[:"$#{key}"] = params.fetch(key.to_sym)
         end
       end
     end
@@ -102,12 +113,12 @@ module Mocrata
 
     def paginate?
       options.fetch(:paginate, false) ||
-        options.has_key?(:page) ||
-        options.has_key?(:per_page)
+        options.key?(:page) ||
+        options.key?(:per_page)
     end
 
     def response_options
-      options.keep_if do |key, value|
+      options.keep_if do |key, _value|
         Mocrata::Response::OPTIONS.include?(key)
       end
     end
@@ -126,7 +137,7 @@ module Mocrata
       # @return [String] the query string
       #
       def query_string(hash)
-        hash.map { |k, v| "#{k}=#{CGI::escape(v.to_s)}" }.join('&')
+        hash.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join('&')
       end
     end
 
