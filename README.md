@@ -1,7 +1,7 @@
 # Mocrata
 
 [![Build Status](https://travis-ci.org/mode/mocrata.svg?branch=master)](https://travis-ci.org/mode/mocrata)
-[![Code Climate](https://codeclimate.com/repos/53d16a75695680764e01ea68/badges/c93756788e4438e90512/gpa.png)](https://codeclimate.com/repos/53d16a75695680764e01ea68/feed)
+[![Code Climate](https://codeclimate.com/repos/53ea7f57e30ba007c500a24a/badges/44f08215be76ea780d56/gpa.svg)](https://codeclimate.com/repos/53ea7f57e30ba007c500a24a/feed)
 [![Gem Version](https://badge.fury.io/rb/mocrata.svg)](http://badge.fury.io/rb/mocrata)
 
 Mocrata is a [SODA](http://dev.socrata.com/) (Socrata Open Data API) client
