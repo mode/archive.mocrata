@@ -1,3 +1,9 @@
+ **Repo Status:** `Archived.`
+
+This repo was identified as an un-managed repository. As such, we have chosedn to decommission this repository to prevent the consumption of security vulnerabilities within this repository.
+
+More info can be found here: https://mode.quip.com/NwvJAwA7l4SN/August-Issue-Review-Committee-Meeting#GYBACAb6dwZ
+
 # Mocrata
 
 [![Build Status](https://travis-ci.org/mode/mocrata.svg?branch=master)](https://travis-ci.org/mode/mocrata)
